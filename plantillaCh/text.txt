@@ -1,0 +1,99 @@
+base de datos:
+
+CREATE DATABASE pd_john_doe_alpha;
+USE pd_john_doe_alpha;
+
+CREATE TABLE Platform (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE
+);
+
+CREATE TABLE Client (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE
+);
+
+CREATE TABLE Invoice (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    client_id INT NOT NULL,
+    amount DECIMAL(12,2) NOT NULL,
+    due_date DATE,
+    status VARCHAR(20) NOT NULL,
+    FOREIGN KEY (client_id) REFERENCES Client(id)
+);
+
+CREATE TABLE Transaction (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    invoice_id INT NOT NULL,
+    platform_id INT NOT NULL,
+    amount DECIMAL(12,2) NOT NULL,
+    transaction_date DATETIME NOT NULL,
+    FOREIGN KEY (invoice_id) REFERENCES Invoice(id),
+    FOREIGN KEY (platform_id) REFERENCES Platform(id)
+);
+
+
+Consultas Avanzadas (solo Postman)
+
+//Total pagado por cada cliente.
+SELECT c.name, SUM(t.amount) AS total_paid
+FROM Client c
+JOIN Invoice i ON c.id = i.client_id
+JOIN Transaction t ON i.id = t.invoice_id
+GROUP BY c.id;
+
+//Facturas pendientes con info de cliente y transacción
+SELECT i.id AS invoice_id, c.name, t.id AS transaction_id, i.amount, i.status
+FROM Invoice i
+JOIN Client c ON i.client_id = c.id
+LEFT JOIN Transaction t ON i.id = t.invoice_id
+WHERE i.status != 'PAID';
+
+//Transacciones por plataforma
+SELECT p.name AS platform, c.name AS client, i.id AS invoice_id, t.amount, t.transaction_date
+FROM Transaction t
+JOIN Platform p ON t.platform_id = p.id
+JOIN Invoice i ON t.invoice_id = i.id
+JOIN Client c ON i.client_id = c.id
+WHERE p.name = 'Nequi'; -- o 'Daviplata'
+
+
+___________________________________________________________
+
+Crea un archivo CSV para cada tabla. Ejemplo de estructura:
+
+Platform.csv
+name
+Nequi
+Daviplata
+
+Client.csv
+name,email
+Juan Perez,juan@email.com
+Maria Lopez,maria@email.com
+
+Invoice.csv
+client_id,amount,due_date,status
+1,100000,2024-06-01,PAID
+2,50000,2024-06-10,PENDING
+
+
+¡Perfecto! Aquí tienes los pasos para cargar datos desde archivos CSV a tu base de datos MySQL usando Node.js y un script de carga.
+
+1. Prepara tus archivos CSV
+Crea un archivo CSV para cada tabla. Ejemplo de estructura:
+
+Platform.csv
+
+Client.csv
+
+Invoice.csv
+
+Transaction.csv
+invoice_id,platform_id,amount,transaction_date
+1,1,100000,2024-06-01 10:00:00
+2,2,50000,2024-06-10 12:00:00
+
+en la termilar usar esta comando node scripts/loadClients.js en cada archivo CSV
+

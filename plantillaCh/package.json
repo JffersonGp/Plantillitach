@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "csv-parser": "^3.2.0",
+    "express": "^5.1.0",
+    "jsonserver": "^0.1.6",
+    "mysql2": "^3.14.3"
+  }
+}
